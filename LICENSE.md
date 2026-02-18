@@ -13,10 +13,11 @@ Copyright (c) 2026 Antoo
    Vous pouvez utiliser, modifier et redistribuer le code, à condition que ce soit pour un usage **non commercial**.  
 
 2. **Attribution et lien vers le projet**  
-   Toute redistribution, y compris sous forme modifiée, doit inclure :  
+   Toute redistribution, y compris sous forme modifiée, doit inclure:  
    - Mon nom : **Antoo**  
    - Le lien vers le dépôt original GitHub : `https://github.com/antoo2471/arkyn-launcher`  
    - Le code doit rester lisible et identifiable comme dérivé du projet original.  
+   - Les mentions "Nom" et "Lien du dépôt original" doivent être visible dans l'interface utilisateur, de façon claire.
 
    **Option recommandée :** utiliser la fonctionnalité “Fork” de GitHub pour redistribuer, ou indiquer clairement dans le `README.md` que le projet dérive de ce dépôt.
 
