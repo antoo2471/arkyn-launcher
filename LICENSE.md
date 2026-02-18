@@ -17,7 +17,7 @@ Copyright (c) 2026 Antoo
    - Mon nom : **Antoo**  
    - Le lien vers le dépôt original GitHub : `https://github.com/antoo2471/arkyn-launcher`  
    - Le code doit rester lisible et identifiable comme dérivé du projet original.  
-   - Les mentions "Nom" et "Lien du dépôt original" doivent être visible dans l'interface utilisateur, de façon claire.
+   - Les mentions "Nom" et "Lien du dépôt original" doivent être visibles dans l'interface utilisateur du projet redistribué, de façon claire.
 
    **Option recommandée :** utiliser la fonctionnalité “Fork” de GitHub pour redistribuer, ou indiquer clairement dans le `README.md` que le projet dérive de ce dépôt.
 
