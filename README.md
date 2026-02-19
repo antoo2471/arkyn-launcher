@@ -1,6 +1,6 @@
 # Arkyn Launcher 🚀
 
-![Arkyn Launcher](https://raw.githubusercontent.com/antoo2471/arkyn-launcher/main/assets/banner.png)  
+![Arkyn Launcher](https://static.neutroncore.fr/newarkyn_nobg.png)  
 
 Arkyn Launcher est un launcher **Minecraft moddé multi-serveurs** pour les serveurs d’Arkyn Studios. Il simplifie la gestion des profils, mods et serveurs, avec une interface simple et sécurisée.  
 
