@@ -1,0 +1,148 @@
+/* Default Vite styles removed to support custom full-window layout */
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.login-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.login-brand .login-logo-img {
+    width: 150px;
+    margin-bottom: 2em;
+}
+
+.login-header h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 8px;
+    text-align: center;
+}
+
+.profiles-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 30px;
+  padding: 20px;
+  max-width: 90vw;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 150px;
+  text-align: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+
+
+.profile-card-body {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 0;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 4px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.profile-card:hover .profile-avatar {
+  border-color: #fff;
+  transform: scale(1.05);
+}
+
+.profile-name {
+  color: #888;
+  font-weight: 600;
+  font-size: 1.2rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.profile-card:hover .profile-name {
+    color: #fff;
+}
+
+.profile-logout {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #d0d0d0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 15px;
+}
+
+.profile-logout:hover {
+  background-color: #c4302b;
+  color: #fff;
+}
+
+.add-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 150px;
+  text-align: center;
+  gap: 10px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.add-profile-icon {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  color: #888;
+  background-color: #1a1a1a;
+  border: 4px solid #1a1a1a;
+  transition: all 0.2s;
+}
+
+.add-profile-card:hover .add-profile-icon {
+  border-color: #fff;
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.add-profile-card:hover .profile-name {
+    color: #fff;
+}

@@ -1,0 +1,84 @@
+{
+    "name": "frontend",
+    "private": true,
+    "version": "3.1.0",
+    "description": "Arkyn Studios Launcher - Official Minecraft Launcher",
+    "homepage": "https://arkyn.fr",
+    "author": {
+        "name": "Arkyn Studios",
+        "email": "no@email.fr"
+    },
+    "main": "electron/main.cjs",
+    "type": "module",
+"scripts": {
+        "dev": "vite",
+        "electron": "vite build && electron .",
+        "electron:pack": "vite build && electron-builder",
+        "electron:pack:linux": "vite build && electron-builder --linux",
+        "electron:pack:mac": "vite build && electron-builder --mac",
+        "electron:pack:win": "vite build && electron-builder --win",
+        "electron:pack:all": "vite build && electron-builder -wml",
+        "build": "vite build",
+        "lint": "eslint .",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.1.0",
+        "@fortawesome/free-brands-svg-icons": "^7.1.0",
+        "@fortawesome/free-solid-svg-icons": "^7.1.0",
+        "@fortawesome/react-fontawesome": "^3.1.1",
+        "discord-rich-presence": "^0.0.8",
+        "electron-updater": "^6.3.9",
+        "electron-squirrel-startup": "^1.0.1",
+        "minecraft-java-core": "file:../core",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.1",
+        "@types/react": "^19.2.5",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^5.1.1",
+        "electron": "^39.2.7",
+        "electron-builder": "^26.0.12",
+        "eslint": "^9.39.1",
+        "eslint-plugin-react-hooks": "^7.0.1",
+        "eslint-plugin-react-refresh": "^0.4.24",
+        "globals": "^16.5.0",
+        "vite": "^7.2.4"
+    },
+    "build": {
+        "appId": "com.arkyn.launcher",
+        "productName": "Arkyn Launcher",
+        "directories": {
+            "output": "dist-electron"
+        },
+        "files": [
+            "dist/**/*",
+            "electron/main.cjs",
+            "electron/preload.cjs",
+            "icon.png"
+        ],
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "icon.png"
+        },
+        "linux": {
+            "target": "AppImage",
+            "icon": "icon.png",
+            "category": "Game",
+            "maintainer": "Arkyn Studios <no@email.fr>"
+        },
+        "mac": {
+            "target": "dmg",
+            "icon": "icon.png",
+            "category": "public.app-category.games"
+        }
+    }
+}
