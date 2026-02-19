@@ -8,6 +8,138 @@
   text-align: left;
 }
 
+.update-gate-shell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(73, 4, 235, 0.24), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(233, 84, 32, 0.2), transparent 40%),
+    #0c0c0c;
+  padding: 24px;
+}
+
+.update-gate-card {
+  width: 100%;
+  max-width: 520px;
+  background: rgba(25, 26, 32, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.update-gate-logo {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  margin-bottom: 18px;
+  border-radius: 18px;
+}
+
+.update-gate-logo.spinning {
+  animation: updateLogoSpin 1.5s linear infinite;
+}
+
+@keyframes updateLogoSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.update-gate-title {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.update-gate-message {
+  margin: 10px 0 0 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.96rem;
+  text-align: center;
+}
+
+.update-gate-version {
+  margin: 6px 0 0 0;
+  color: #b9bcff;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.update-gate-progress {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.update-gate-progress-text {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.update-gate-progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.update-gate-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4904eb 0%, #7e5dff 100%);
+  transition: width 0.25s ease;
+}
+
+.update-gate-actions {
+  width: 100%;
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.update-gate-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.update-gate-btn.primary {
+  background: #4904eb;
+  color: #fff;
+}
+
+.update-gate-btn.primary:hover {
+  filter: brightness(1.12);
+}
+
+.update-gate-btn.secondary {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.update-gate-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .login-main-content {
     flex: 1;
     display: flex;

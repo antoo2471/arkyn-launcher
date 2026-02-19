@@ -6,6 +6,17 @@ dist/
 dist-ssr/
 dist-electron/
 build/
+out/
+
+# Electron release artifacts (safety if output dir changes)
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
+*.blockmap
+latest*.yml
 
 # Local env/config
 .env

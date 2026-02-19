@@ -39,6 +39,7 @@ if (require('electron-squirrel-startup')) {
 }
 
 let mainWindow;
+let splashWindow;
 let logWindow;
 let currentGameProcess = null;
 let modsGuardTimer = null;
@@ -55,16 +56,53 @@ let updaterState = {
     latestVersion: null,
     progressPercent: 0
 };
+let releaseMainWindowTimer = null;
+let mainWindowReleased = false;
+let updaterGateStartedAt = Date.now();
+
+const MIN_UPDATER_SPLASH_MS = 3000;
 
 function publishUpdaterState() {
     if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('updater-state', updaterState);
     }
+    if (splashWindow && !splashWindow.isDestroyed()) {
+        splashWindow.webContents.send('updater-state', updaterState);
+    }
+}
+
+function releaseMainWindowIfAllowed() {
+    if (mainWindowReleased) return;
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    const allowed = updaterState.status === 'up-to-date' || updaterState.status === 'disabled';
+    if (!allowed) return;
+
+    if (releaseMainWindowTimer) {
+        clearTimeout(releaseMainWindowTimer);
+    }
+
+    const elapsed = Date.now() - updaterGateStartedAt;
+    const waitMs = Math.max(0, MIN_UPDATER_SPLASH_MS - elapsed);
+
+    releaseMainWindowTimer = setTimeout(() => {
+        if (mainWindowReleased) return;
+        mainWindowReleased = true;
+
+        if (splashWindow && !splashWindow.isDestroyed()) {
+            splashWindow.close();
+        }
+
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    }, waitMs);
 }
 
 function setUpdaterState(patch) {
     updaterState = { ...updaterState, ...patch };
     publishUpdaterState();
+    releaseMainWindowIfAllowed();
 }
 
 function parseBooleanEnv(value) {
@@ -186,7 +224,7 @@ function setupAutoUpdater() {
                 message: error?.message || 'Verification impossible'
             });
         });
-    }, 3000);
+    }, 200);
 }
 
 // Discord Rich Presence functions
@@ -444,7 +482,8 @@ function createWindow() {
             preload: preloadPath
         },
         autoHideMenuBar: true,
-        frame: false
+        frame: false,
+        show: false
     });
 
     ipcMain.on('window-minimize', () => {
@@ -493,7 +532,42 @@ function createWindow() {
     updateDiscordPresence('Dans le launcher', 'Prêt à jouer', 'arkyn_logo', 'idle', 'En attente');
 }
 
+function createSplashWindow() {
+    splashWindow = new BrowserWindow({
+        width: 380,
+        height: 450,
+        frame: false,
+        resizable: false,
+        minimizable: false,
+        maximizable: false,
+        fullscreenable: false,
+        alwaysOnTop: true,
+        autoHideMenuBar: true,
+        backgroundColor: '#0d0d14',
+        icon: path.join(__dirname, '..', 'icon.png'),
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            enableRemoteModule: false,
+            webSecurity: true,
+            sandbox: false,
+            preload: path.join(__dirname, 'preload.cjs')
+        }
+    });
+
+    splashWindow.loadURL(`file://${path.join(__dirname, 'splash.html')}`);
+    splashWindow.on('closed', () => {
+        splashWindow = null;
+        if (!mainWindowReleased) {
+            app.quit();
+        }
+    });
+}
+
 app.whenReady().then(() => {
+    updaterGateStartedAt = Date.now();
+    mainWindowReleased = false;
+    createSplashWindow();
     createWindow();
     setupAutoUpdater();
 });

@@ -53,10 +53,19 @@
         "directories": {
             "output": "dist-electron"
         },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "antoo2471",
+                "repo": "arkyn-launcher",
+                "releaseType": "release"
+            }
+        ],
         "files": [
             "dist/**/*",
             "electron/main.cjs",
             "electron/preload.cjs",
+            "electron/splash.html",
             "icon.png"
         ],
         "nsis": {
