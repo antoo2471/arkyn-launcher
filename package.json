@@ -1,7 +1,7 @@
 {
     "name": "frontend",
     "private": true,
-    "version": "3.1.0",
+    "version": "3.1.1",
     "description": "Arkyn Studios Launcher - Official Minecraft Launcher",
     "homepage": "https://arkyn.fr",
     "author": {
