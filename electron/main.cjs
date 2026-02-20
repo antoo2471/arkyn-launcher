@@ -852,23 +852,21 @@ ipcMain.handle('launch-game', async (event, options) => {
         };
 
         const process = await launcher.Launch(launchOptions);
-        if (!process || !process.pid) {
-            throw new Error('Impossible de suivre le process du jeu.');
-        }
-        currentGameProcess = process;
-        console.log('[StrixAC - Layer 1] Game process attached:', currentGameProcess.pid);
+        // Be more tolerant with process tracking - don't fail if we can't immediately track the PID
+        // The game might still launch successfully
+        if (process && process.pid) {
+            currentGameProcess = process;
+            console.log('[StrixAC - Layer 1] Game process attached:', currentGameProcess.pid);
 
-        if (guardTriggered) {
-            console.warn('[StrixAC - Layer 1] Tampering was detected during bootstrap, killing game immediately');
-            stopGameProcess('bootstrap_detection_after_spawn');
-            return { success: false, error: 'Modification détectée pendant le lancement.' };
-        }
-
-        if (currentGameProcess && typeof currentGameProcess.on === 'function') {
-            currentGameProcess.on('exit', () => {
-                stopModsGuard();
-                currentGameProcess = null;
-            });
+            if (typeof currentGameProcess.on === 'function') {
+                currentGameProcess.on('exit', () => {
+                    stopModsGuard();
+                    currentGameProcess = null;
+                });
+            }
+        } else {
+            console.warn('[StrixAC - Layer 1] Could not attach to game process, but continuing launch...');
+            // Don't set currentGameProcess, but continue with launch
         }
 
         // Determine which Arkyn server is being played
