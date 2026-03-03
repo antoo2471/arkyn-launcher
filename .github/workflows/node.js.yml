@@ -34,6 +34,7 @@ jobs:
           if [ "$RUNNER_OS" = "Linux" ]; then npm run electron:pack:linux -- --publish always; fi
           if [ "$RUNNER_OS" = "Windows" ]; then npm run electron:pack:win -- --publish always; fi
           if [ "$RUNNER_OS" = "macOS" ]; then npm run electron:pack:mac -- --publish always; fi
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
