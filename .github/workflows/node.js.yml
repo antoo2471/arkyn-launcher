@@ -46,10 +46,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            *.dmg
-            *.exe
-            *.AppImage
-            *.appimage
-            *.yml
+            dist-electron/*.${{ runner.os == 'Linux' && 'AppImage' || runner.os == 'Windows' && 'exe' || 'dmg' }}
+            dist-electron/*.${{ runner.os == 'Linux' && 'appimage' || '' }}
+            dist-electron/*.yml
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
