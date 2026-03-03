@@ -597,12 +597,13 @@ const https = require('https');
 const http = require('http');
 const { URL } = require('url');
 
-function downloadFile(url, dest, redirectDepth = 0) {
-    console.log('[Main] downloadFile', url);
+function downloadFile(url, dest, redirectDepth = 0, retryCount = 0) {
+    console.log(`[Main] downloadFile ${path.basename(dest)} (attempt ${retryCount + 1})`, url);
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(dest);
         const protocol = url.startsWith('https') ? https : http;
-        protocol.get(url, (response) => {
+        
+        const request = protocol.get(url, { timeout: 30000 }, (response) => {
             // Follow redirect if needed
             if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                 if (redirectDepth >= 5) {
@@ -612,20 +613,78 @@ function downloadFile(url, dest, redirectDepth = 0) {
                 const nextUrl = new URL(response.headers.location, url).toString();
                 response.resume(); // discard
                 file.close();
-                return resolve(downloadFile(nextUrl, dest, redirectDepth + 1));
+                return resolve(downloadFile(nextUrl, dest, redirectDepth + 1, retryCount));
             }
 
             if (response.statusCode !== 200) {
-                fs.unlink(dest, () => reject(new Error(`Failed to download: ${response.statusCode}`)));
+                fs.unlink(dest, () => {
+                    const error = new Error(`Failed to download: ${response.statusCode} - ${response.statusMessage}`);
+                    error.statusCode = response.statusCode;
+                    reject(error);
+                });
                 return;
             }
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close(resolve);
+
+            let downloadedBytes = 0;
+            const totalBytes = parseInt(response.headers['content-length']) || 0;
+            
+            response.on('data', (chunk) => {
+                downloadedBytes += chunk.length;
+                if (totalBytes > 0) {
+                    const percent = Math.round((downloadedBytes / totalBytes) * 100);
+                    console.log(`[Main] Downloading ${path.basename(dest)}: ${percent}% (${downloadedBytes}/${totalBytes} bytes)`);
+                }
             });
-        }).on('error', (err) => {
-            fs.unlink(dest, () => reject(err));
+
+            response.pipe(file);
+            
+            file.on('finish', () => {
+                file.close(() => {
+                    // Verify file size
+                    try {
+                        const stats = fs.statSync(dest);
+                        if (stats.size === 0) {
+                            fs.unlink(dest, () => reject(new Error('Downloaded file is empty (0KB)')));
+                            return;
+                        }
+                        console.log(`[Main] Successfully downloaded ${path.basename(dest)}: ${stats.size} bytes`);
+                        resolve();
+                    } catch (error) {
+                        fs.unlink(dest, () => reject(new Error(`Failed to verify downloaded file: ${error.message}`)));
+                    }
+                });
+            });
+            
+            file.on('error', (err) => {
+                fs.unlink(dest, () => reject(new Error(`File write error: ${err.message}`)));
+            });
         });
+
+        request.on('timeout', () => {
+            request.destroy();
+            fs.unlink(dest, () => reject(new Error('Download timeout (30s)')));
+        });
+
+        request.on('error', (err) => {
+            fs.unlink(dest, () => reject(new Error(`Request error: ${err.message}`)));
+        });
+    }).catch(error => {
+        // Retry logic for specific errors
+        const maxRetries = 3;
+        const retryableErrors = [522, 502, 503, 504, 'ETIMEDOUT', 'ECONNRESET'];
+        
+        const shouldRetry = retryCount < maxRetries && (
+            retryableErrors.includes(error.statusCode) ||
+            retryableErrors.some(code => error.message.includes(code))
+        );
+
+        if (shouldRetry) {
+            console.log(`[Main] Retrying ${path.basename(dest)} in ${2 ** retryCount} seconds (error: ${error.message})`);
+            return new Promise(resolve => setTimeout(resolve, (2 ** retryCount) * 1000))
+                .then(() => downloadFile(url, dest, redirectDepth, retryCount + 1));
+        }
+        
+        throw error;
     });
 }
 
@@ -681,24 +740,49 @@ ipcMain.handle('sync-mods', async (event, { mods, gameFolder }) => {
         }
     }
 
-    // 3. Download
+    // 3. Download in parallel with concurrency limit
     let downloaded = 0;
     const total = toDownload.length;
+    const MAX_CONCURRENT = 3; // Download 3 mods at once
 
     // Notify start
     event.sender.send('mods-progress', { current: 0, total: total > 0 ? total : 1 });
 
-    for (const mod of toDownload) {
-        const modPath = path.join(modsDir, mod.name);
-        console.log('Downloading mod:', mod.name);
+    if (toDownload.length === 0) {
+        return { success: true };
+    }
 
-        try {
-            await downloadFile(mod.url, modPath);
-            downloaded++;
-            event.sender.send('mods-progress', { current: downloaded, total });
-        } catch (e) {
-            console.error("Failed to download mod:", mod.name, e);
-        }
+    console.log(`[Main] Starting parallel download of ${total} mods (max ${MAX_CONCURRENT} concurrent)`);
+
+    // Process downloads in batches
+    for (let i = 0; i < toDownload.length; i += MAX_CONCURRENT) {
+        const batch = toDownload.slice(i, i + MAX_CONCURRENT);
+        
+        const downloadPromises = batch.map(async (mod) => {
+            const modPath = path.join(modsDir, mod.name);
+            console.log('Downloading mod:', mod.name);
+
+            try {
+                await downloadFile(mod.url, modPath);
+                downloaded++;
+                event.sender.send('mods-progress', { current: downloaded, total });
+                return { success: true, mod: mod.name };
+            } catch (e) {
+                console.error("Failed to download mod:", mod.name, e);
+                return { success: false, mod: mod.name, error: e.message };
+            }
+        });
+
+        // Wait for current batch to complete before starting next
+        const results = await Promise.allSettled(downloadPromises);
+        
+        // Log any failures from this batch
+        results.forEach((result, index) => {
+            if (result.status === 'rejected' || !result.value?.success) {
+                const error = result.status === 'rejected' ? result.reason : result.value.error;
+                console.error(`[Main] Batch download failed for ${batch[index].name}:`, error);
+            }
+        });
     }
 
     return { success: true };
