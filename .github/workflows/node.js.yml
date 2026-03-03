@@ -1,19 +1,18 @@
-name: Electron CI/CD
+name: Electron CI - Upload to Existing Release
 
 on:
   push:
-    tags:
-      - 'v*.*.*'   # Déclenche uniquement sur un tag vX.Y.Z
+    branches: [ "main" ]  # Trigger on every push
 
 jobs:
-  build-and-release:
+  build-and-upload:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
-      # 1️⃣ Checkout du code
+      # 1️⃣ Checkout code
       - uses: actions/checkout@v4
 
       # 2️⃣ Setup Node.js
@@ -22,39 +21,43 @@ jobs:
         with:
           node-version: 20.x
 
-      # 3️⃣ Installer les dépendances
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Get version from tag (ex: v3.1.2 → 3.1.2)
-      - name: Get version from tag
+      # 4️⃣ Get version from package.json
+      - name: Get version
         id: get_version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # 5️⃣ Build Electron selon l'OS
+      # 5️⃣ Build Electron app for current OS
       - name: Build Electron app
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then npm run electron:pack:linux; fi
           if [[ "$RUNNER_OS" == "Windows" ]]; then npm run electron:pack:win; fi
           if [[ "$RUNNER_OS" == "macOS" ]]; then npm run electron:pack:mac; fi
 
-      # 6️⃣ Créer la release GitHub
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: "${{ github.ref_name }}"
-          name: "${{ github.ref_name }}"
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 6️⃣ Check if release exists
+      - name: Check release exists
+        id: check_release
+        run: |
+          RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/v${VERSION}")
+          if echo "$RESPONSE" | grep -q '"Not Found"'; then
+            echo "Release v${VERSION} does not exist!"
+            exit 1
+          fi
+          # Extract release ID
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
 
-      # 7️⃣ Upload tous les fichiers générés (exe, dmg, AppImage, YAML, etc.)
+      # 7️⃣ Upload all built files to the existing release
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: "v${{ env.VERSION }}"
           files: "dist-electron/**/*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
