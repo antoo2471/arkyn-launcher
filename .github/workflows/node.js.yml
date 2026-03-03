@@ -54,3 +54,4 @@ jobs:
           asset_path: ./dist-electron
           asset_name: Arkyn-Launcher-${{ env.VERSION }}-${{ runner.os }}.zip
           asset_content_type: application/zip
+# .
