@@ -34,9 +34,9 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # 5️⃣ Définir le token GH pour electron-builder
-      - name: Set GH token
-        run: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+      # 5️⃣ Définir le PAT pour electron-builder
+      - name: Set GH_PAT for electron-builder
+        run: echo "GH_TOKEN=${{ secrets.GH_PAT }}" >> $GITHUB_ENV
 
       # 6️⃣ Build Electron selon l'OS
       - name: Build Electron app
@@ -45,7 +45,7 @@ jobs:
           if [[ "$RUNNER_OS" == "Windows" ]]; then npm run electron:pack:win; fi
           if [[ "$RUNNER_OS" == "macOS" ]]; then npm run electron:pack:mac; fi
 
-      # 7️⃣ Créer la release GitHub avec tag v[version]
+      # 7️⃣ Créer la release GitHub
       - name: Create GitHub release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -54,13 +54,12 @@ jobs:
           name: "v${{ env.VERSION }}"
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
-      # 8️⃣ Upload les fichiers générés (exe, dmg, AppImage, YAML, etc.)
+      # 8️⃣ Upload tous les fichiers générés (exe, dmg, AppImage, YAML, etc.)
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
           files: "dist-electron/**/*"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
