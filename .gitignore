@@ -19,8 +19,8 @@ out/
 latest*.yml
 
 # Local env/config
-.env
-.env.*
+# .env       # No important data : github actions wants this url to build
+# .env.*
 *.local
 app-update.yml
 
