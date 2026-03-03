@@ -8,34 +8,44 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
+      # 1️⃣ Checkout du code
       - uses: actions/checkout@v4
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
 
+      # 3️⃣ Installer les dépendances
       - name: Install dependencies
         run: npm i
 
+      # 4️⃣ Récupérer la version du package.json
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      # 5️⃣ Définir le token GH pour electron-builder
+      - name: Set GH token
+        run: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      # 6️⃣ Build Electron selon l'OS
       - name: Build Electron app
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then npm run electron:pack:linux; fi
           if [[ "$RUNNER_OS" == "Windows" ]]; then npm run electron:pack:win; fi
           if [[ "$RUNNER_OS" == "macOS" ]]; then npm run electron:pack:mac; fi
 
+      # 7️⃣ Créer la release GitHub avec tag v[version]
       - name: Create GitHub release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -47,9 +57,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload release assets (exe, dmg, AppImage, YAML...)
+      # 8️⃣ Upload les fichiers générés (exe, dmg, AppImage, YAML, etc.)
+      - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
-          files: "dist-electron/**/*"  # upload tout ce que builder a créé, y compris YAML
+          files: "dist-electron/**/*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
