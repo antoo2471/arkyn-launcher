@@ -29,7 +29,7 @@ Copyright (c) 2026 Antoo
 
 5. **Restrictions**  
    - Il est interdit de vendre ou monétiser le code ou toute œuvre dérivée.  
-   - Il est interdit d’utiliser le code pour accéder à des serveurs ou services comportant des boutiques, microtransactions ou toute forme de contenu payant.  
+   - Il est interdit d’utiliser le code pour accéder à des serveurs ou services comportant des boutiques, microtransactions ou toute forme de contenu payant à part pour les serveurs approuvés par Arkyn Studios.  
    - Aucune restriction supplémentaire sur la modification ne doit être imposée par les redistributions.
 
 ## Avertissement
