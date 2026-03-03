@@ -2,9 +2,8 @@ name: Electron CI/CD
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*.*.*'   # Déclenche uniquement sur un tag vX.Y.Z
 
 jobs:
   build-and-release:
@@ -25,41 +24,37 @@ jobs:
 
       # 3️⃣ Installer les dépendances
       - name: Install dependencies
-        run: npm i
+        run: npm ci
 
-      # 4️⃣ Récupérer la version du package.json
-      - name: Get version from package.json
+      # 4️⃣ Get version from tag (ex: v3.1.2 → 3.1.2)
+      - name: Get version from tag
         id: get_version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=${GITHUB_REF#refs/tags/v}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      # 5️⃣ Définir le PAT pour electron-builder
-      - name: Set GH_PAT for electron-builder
-        run: echo "GH_TOKEN=${{ secrets.GH_PAT }}" >> $GITHUB_ENV
-
-      # 6️⃣ Build Electron selon l'OS
+      # 5️⃣ Build Electron selon l'OS
       - name: Build Electron app
         run: |
           if [[ "$RUNNER_OS" == "Linux" ]]; then npm run electron:pack:linux; fi
           if [[ "$RUNNER_OS" == "Windows" ]]; then npm run electron:pack:win; fi
           if [[ "$RUNNER_OS" == "macOS" ]]; then npm run electron:pack:mac; fi
 
-      # 7️⃣ Créer la release GitHub
+      # 6️⃣ Créer la release GitHub
       - name: Create GitHub release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "v${{ env.VERSION }}"
-          name: "v${{ env.VERSION }}"
+          tag_name: "${{ github.ref_name }}"
+          name: "${{ github.ref_name }}"
           draft: false
           prerelease: false
-          token: ${{ secrets.GH_PAT }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8️⃣ Upload tous les fichiers générés (exe, dmg, AppImage, YAML, etc)
+      # 7️⃣ Upload tous les fichiers générés (exe, dmg, AppImage, YAML, etc.)
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
           files: "dist-electron/**/*"
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
