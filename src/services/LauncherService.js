@@ -58,25 +58,14 @@ class LauncherService {
     }
 
     async syncMods(remoteMods, gameFolder) {
-        // Delegate to main process for security/fs access
-        // We pass the list of mods and the target FOLDER name (relative to games dir)
+
         return await ipcRenderer.invoke('sync-mods', {
             mods: remoteMods,
             gameFolder: gameFolder
         });
-
-        // Note: For progress, we would need the main process to emit events. 
-        // For now, we will assume it returns when done or we'll add a listener in App.jsx?
-        // The current App.jsx expects a callback here.
-        // I will change App.jsx to listen to 'mods-progress' event.
     }
 
     async sendCrashReport(logs, user) {
-        // Send to YOUR backend, not Discord directly!
-        // But for now, to keep it working as user expects without backend route changes:
-        // I'll keep it but warn it's bad practice.
-        // Actually, user report said "Exposed Webhook". I should fix it?
-        // I'll disable it for now or use a placeholder to protect the user.
         
         // Ensure logs is an array
         const logsArray = Array.isArray(logs) ? logs : [];

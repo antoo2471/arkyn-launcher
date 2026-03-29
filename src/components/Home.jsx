@@ -106,6 +106,7 @@ export default function Home({ user, onLaunch, progress, isLaunching, logs, onSe
     };
 
     const updateButtonLabel = (() => {
+        if (updater.status === 'installing') return 'Installation...';
         if (updater.status === 'downloaded') return 'Redemarrer pour installer';
         if (updater.status === 'available') return 'Telecharger la MAJ';
         if (updater.status === 'downloading') return 'Telechargement...';
@@ -115,7 +116,6 @@ export default function Home({ user, onLaunch, progress, isLaunching, logs, onSe
 
     return (
         <div className="app-shell">
-            {/* Titlebar personnalisé */}
             <div className="custom-titlebar">
                 <div className="titlebar-drag-region">
                     <div className="window-title">
@@ -136,7 +136,6 @@ export default function Home({ user, onLaunch, progress, isLaunching, logs, onSe
             </div>
 
             <div className="home-container">
-                {/* Barre latérale de sélection de serveurs (Style Discord) */}
                 <div className="server-sidebar">
                     <div
                         className={`sidebar-logo user-avatar-btn ${showProfileMenu ? 'active' : ''}`}
@@ -226,7 +225,7 @@ export default function Home({ user, onLaunch, progress, isLaunching, logs, onSe
                             <button
                                 className="updater-action-btn"
                                 onClick={handleUpdateAction}
-                                disabled={updater.status === 'disabled' || updater.status === 'checking' || updater.status === 'downloading'}
+                                disabled={updater.status === 'disabled' || updater.status === 'checking' || updater.status === 'downloading' || updater.status === 'installing'}
                             >
                                 {updateButtonLabel}
                             </button>
